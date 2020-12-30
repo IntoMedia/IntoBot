@@ -3,6 +3,7 @@ const YTDL = require('ytdl-core');
 const Giphy = require('./lib/giphy');
 const Icndb = require('./lib/icndb');
 const Quote = require('./lib/quote.js');
+const IntoPoll = require('./lib/poll.js');
 const Minesweeper = require('discord.js-minesweeper');
 const { convert } = require('exchange-rates-api');
 let Parser = require('rss-parser');
@@ -104,14 +105,14 @@ client.on('message', message => {
         }
     }
 
-    if (msg.startsWith(PREFIX + 'skip')){
+    if (msg.startsWith(PREFIX + 'skip')) {
         var server = servers[message.guild.id];
         if (server.dispatcher) {
             server.dispatcher.end();
         }
     }
 
-    if (msg.startsWith(PREFIX + 'stop')){
+    if (msg.startsWith(PREFIX + 'stop')) {
         var server = servers[message.guild.id]; 
 
         if (message.guild.voiceConnection) {
@@ -125,11 +126,11 @@ client.on('message', message => {
         }
     }
 
-    if (msg.startsWith(PREFIX + 'készítőd')){
+    if (msg.startsWith(PREFIX + 'készítőd')) {
         message.channel.send('Engem galosik készített!');
     }
 
-    if (msg.startsWith(PREFIX + 'parancsok')){
+    if (msg.startsWith(PREFIX + 'parancsok')) {
         const availableCommands = [
             { name: 'készítőd', description: 'A bot készítője' },
             { name: 'parancsok', description: 'Parancsok listája' },
@@ -167,7 +168,7 @@ client.on('message', message => {
             });
     }
     
-    if (msg.startsWith(PREFIX + 'joke')){
+    if (msg.startsWith(PREFIX + 'joke')) {
         Icndb(sender)
             .then(res => message.channel.send(res))
             .catch(err => {
@@ -333,8 +334,6 @@ client.on('message', message => {
 
         message.channel.send(gifs[a]);
     }
-
-
     
     if (msg.startsWith(PREFIX + 'q')) {
         const id = args[0] || null;
@@ -406,6 +405,10 @@ client.on('message', message => {
 
     if (flipping_table.some(h => msg.indexOf(h) >= 0)) {
         message.channel.send(`┬─┬ノ( º _ ºノ)`);
+    }
+
+    if (msg.startsWith(PREFIX + 'intopoll')) {
+        IntoPoll.createPoll(message, args);
     }
 
     if (message.mentions.has(client.user)) {
