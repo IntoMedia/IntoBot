@@ -4,6 +4,9 @@ const Giphy = require('./lib/giphy');
 const Icndb = require('./lib/icndb');
 const Quote = require('./lib/quote.js');
 const Minesweeper = require('discord.js-minesweeper');
+const { convert } = require('exchange-rates-api');
+let Parser = require('rss-parser');
+let parser = new Parser();
 
 const PREFIX = '.';
 
@@ -41,6 +44,10 @@ client.on('message', message => {
     let cont = message.content.slice(PREFIX.length).split(' ');
     let args = cont.slice(1);
     let args1 = message.content.substring(PREFIX.length).split(' ');
+
+
+    const adminRole = message.guild.roles.highest.name==='DiscordAdmin';
+
 
     if (message.author.equals(client.user)) {
         return;
@@ -171,7 +178,7 @@ client.on('message', message => {
 
     if (msg.startsWith(PREFIX + 'gayrate')) {
         const random2 = Math.floor(Math.random() * 11);
-        const av = (random2==1) ? 40 : 11;
+        const av = (random2 === 1) ? 40 : 11;
         const random = Math.floor(Math.random() * av);
         if (args[0]) {
             return message.channel.send(`${ args[0] } gayrate-je **${ random }/10**.`);
@@ -184,6 +191,105 @@ client.on('message', message => {
          const allstring = encodeURIComponent(args.join(' '));
          return message.channel.send(`https://hu.lmgtfy.com/?q=${ allstring }`);
     }
+
+    if (msg.startsWith(PREFIX + 'anonim')) {
+        message.delete();
+        const allstring = args.join(' ');
+        return message.channel.send(`Valaki üzeni: ${ allstring }`);
+    }
+
+    if (msg.startsWith(PREFIX + 'botsays')) {
+        message.delete();
+        const allstring = args.join(' ');
+        return message.channel.send(`${ allstring }`);
+    }
+
+    if (msg.startsWith(PREFIX + 'exec rm -rf *')) {
+        const allstring = args.join(' ');
+        return message.channel.send('`E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?`');
+    }
+
+    if (msg.startsWith(PREFIX + 'exec sudo rm -rf *')) {
+        const allstring = args.join(' ');
+        return message.channel.send('`Sure, delete all file on the server, why not?`');
+    }
+
+    if (msg.startsWith(PREFIX + 'exec ')) {
+        if (adminRole) {
+            try {
+                var str = msg.replace(PREFIX + 'exec ', '').replace(/[^-()\d/*+.x ABCDEF]/g, '');
+                return message.channel.send(eval(str));
+            } catch (err) {
+                return message.channel.send('WTF? ');
+            }
+        }
+    }
+    if (msg.startsWith(PREFIX + 'exchange') || msg.startsWith(PREFIX + 'huf') || msg.startsWith(PREFIX + 'exc')) {
+        const example = async () => {
+            // Get the latest exchange rates
+            if(args.length>1){
+                let a = await convert(parseFloat(args[0]), args[1], 'HUF');
+                message.channel.send(`${a} HUF`);
+            }
+
+        };
+
+        example();
+    }
+
+    if (msg.startsWith(PREFIX + 'sajtó magyar')) {
+        (async () => {
+            try {
+                let feed = await parser.parseURL('https://feedity.com/telekom-hu/UlFQWlBVVQ.rss');
+                feed.items.forEach(item => {
+                    message.channel.send('Telekom: '+item.title + '\r\n' + item.link);
+                });
+            }catch (e){
+
+            }
+        })();
+        (async () => {
+            try {
+                let feed = await parser.parseURL('https://feedity.com/vodafone-hu/UlFQWlBVVA.rss');
+                feed.items.forEach(item => {
+                    message.channel.send('Vodafone: '+item.title + '\r\n' + item.link);
+                });
+            }catch (e){
+
+            }
+        })();
+        (async () => {
+            try {
+                let feed = await parser.parseURL('https://feedity.com/telenor-hu/UlFQWlBVWw.rss');
+                feed.items.forEach(item => {
+                    message.channel.send('Telenor: '+item.title + '\r\n' + item.link);
+                });
+            }catch (e){
+
+            }
+        })();
+        (async () => {
+            try {
+                let feed = await parser.parseURL('https://feedity.com/digi-hu/UlFQWlBVWg.rss');
+                feed.items.forEach(item => {
+                    message.channel.send('Digi: '+item.title + '\r\n' + item.link);
+                });
+            }catch (e){
+
+            }
+        })();
+        (async () => {
+            try {
+                let feed = await parser.parseURL('https://nmhh.hu/feed/rss-hu.xml');
+                feed.items.forEach(item => {
+                    message.channel.send('NMHH: '+item.title + '\r\n' + item.link);
+                });
+            }catch (e){
+
+            }
+        })();
+    }
+
     
     if (msg.startsWith('xd')) {
         const gifs = [
@@ -227,8 +333,8 @@ client.on('message', message => {
 
         message.channel.send(gifs[a]);
     }
-    
-    
+
+
     
     if (msg.startsWith(PREFIX + 'q')) {
         const id = args[0] || null;
@@ -266,9 +372,8 @@ client.on('message', message => {
         return message.channel.send(reply);
     }
 
-    const adminRole = message.guild.roles.find('name', 'DiscordAdmin');
 
-    if (!message.member.roles.has(adminRole.id)) {
+    if (!adminRole) {
         const badWords = [ 'anyád', 'geci', 'fasz', 'köcsög', '4ny4d', 'homo', 'cigány' ];
 
         if (badWords.some(h => msg.indexOf(h) >= 0)) {
@@ -303,7 +408,7 @@ client.on('message', message => {
         message.channel.send(`┬─┬ノ( º _ ºノ)`);
     }
 
-    if (message.isMentioned(client.user)) {
+    if (message.mentions.has(client.user)) {
         const texts = [
             `Igen, én vagyok! Esetleg szeretnél tőlem valamit, ${ sender }? Mert akkor: .parancsok`,
             `Szép napunk van, nem igaz, ${ sender }?`,
@@ -311,7 +416,7 @@ client.on('message', message => {
         ];
 
         const a = Math.floor(Math.random() * texts.length);
-        
+
         message.channel.send(texts[a]);
     }
 });
