@@ -3,6 +3,7 @@ const YTDL = require('ytdl-core');
 const Giphy = require('./lib/giphy');
 const Icndb = require('./lib/icndb');
 const Quote = require('./lib/quote.js');
+const IntoPoll = require('./lib/poll.js');
 const Minesweeper = require('discord.js-minesweeper');
 const { convert } = require('exchange-rates-api');
 let Parser = require('rss-parser');
@@ -44,7 +45,6 @@ client.on('message', message => {
     let cont = message.content.slice(PREFIX.length).split(' ');
     let args = cont.slice(1);
     let args1 = message.content.substring(PREFIX.length).split(' ');
-
 
     const adminRole = message.guild.roles.highest.name==='DiscordAdmin';
 
@@ -104,14 +104,14 @@ client.on('message', message => {
         }
     }
 
-    if (msg.startsWith(PREFIX + 'skip')){
+    if (msg.startsWith(PREFIX + 'skip')) {
         var server = servers[message.guild.id];
         if (server.dispatcher) {
             server.dispatcher.end();
         }
     }
 
-    if (msg.startsWith(PREFIX + 'stop')){
+    if (msg.startsWith(PREFIX + 'stop')) {
         var server = servers[message.guild.id]; 
 
         if (message.guild.voiceConnection) {
@@ -125,11 +125,11 @@ client.on('message', message => {
         }
     }
 
-    if (msg.startsWith(PREFIX + 'készítőd')){
+    if (msg.startsWith(PREFIX + 'készítőd')) {
         message.channel.send('Engem galosik készített!');
     }
 
-    if (msg.startsWith(PREFIX + 'parancsok')){
+    if (msg.startsWith(PREFIX + 'parancsok')) {
         const availableCommands = [
             { name: 'készítőd', description: 'A bot készítője' },
             { name: 'parancsok', description: 'Parancsok listája' },
@@ -167,7 +167,7 @@ client.on('message', message => {
             });
     }
     
-    if (msg.startsWith(PREFIX + 'joke')){
+    if (msg.startsWith(PREFIX + 'joke')) {
         Icndb(sender)
             .then(res => message.channel.send(res))
             .catch(err => {
@@ -333,8 +333,6 @@ client.on('message', message => {
 
         message.channel.send(gifs[a]);
     }
-
-
     
     if (msg.startsWith(PREFIX + 'q')) {
         const id = args[0] || null;
@@ -408,6 +406,15 @@ client.on('message', message => {
         message.channel.send(`┬─┬ノ( º _ ºノ)`);
     }
 
+    if (msg.startsWith(PREFIX + 'intopollstop')) {
+        IntoPoll.stopPoll(message);
+        return;
+    }
+
+    if (msg.startsWith(PREFIX + 'intopoll')) {
+        IntoPoll.createPoll(message, args);
+    }
+
     if (message.mentions.has(client.user)) {
         const texts = [
             `Igen, én vagyok! Esetleg szeretnél tőlem valamit, ${ sender }? Mert akkor: .parancsok`,
@@ -419,6 +426,11 @@ client.on('message', message => {
 
         message.channel.send(texts[a]);
     }
+});
+
+client.on('messageReactionAdd', (messageReaction, user) => {
+    if (user.bot) return;
+    IntoPoll.vote(messageReaction, user);
 });
 
 client.login(process.env.BOT_TOKEN);     
