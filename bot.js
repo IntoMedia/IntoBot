@@ -46,7 +46,6 @@ client.on('message', message => {
     let args = cont.slice(1);
     let args1 = message.content.substring(PREFIX.length).split(' ');
 
-
     const adminRole = message.guild.roles.highest.name==='DiscordAdmin';
 
 
@@ -407,6 +406,11 @@ client.on('message', message => {
         message.channel.send(`┬─┬ノ( º _ ºノ)`);
     }
 
+    if (msg.startsWith(PREFIX + 'intopollstop')) {
+        IntoPoll.stopPoll(message);
+        return;
+    }
+
     if (msg.startsWith(PREFIX + 'intopoll')) {
         IntoPoll.createPoll(message, args);
     }
@@ -422,6 +426,11 @@ client.on('message', message => {
 
         message.channel.send(texts[a]);
     }
+});
+
+client.on('messageReactionAdd', (messageReaction, user) => {
+    if (user.bot) return;
+    IntoPoll.vote(messageReaction, user);
 });
 
 client.login(process.env.BOT_TOKEN);     
