@@ -147,9 +147,14 @@ client.on('message', message => {
             { name: 'joke', description: 'Vicc generálása' },
             { name: 'zhjegy', description: 'Tudd meg, mennyi lesz a ZH jegyed' },
             { name: 'gayrate', description: 'Tudd meg a gayrate-edet vagy valaki/valami másét' },
-            { name: 'google', description: 'LMGTFY linkek generálása adott keresési kritérium alapján' }
+            { name: 'google', description: 'LMGTFY linkek generálása adott keresési kritérium alapján' },
+            { name: 'exchange', description: 'pénz váltása forintra' }
         ];
-
+        if(adminRole) {
+            availableCommands.push({ name: 'botsaystochannel', description: 'Beszéltesd a bot-ot egy csatornán' });
+            availableCommands.push({ name: 'botsays', description: 'Beszéltesd a bot-ot ezen a csatornán' });
+            availableCommands.push({ name: 'botactivity', description: 'Mit csináljon a bot?' });
+        }
         let output = `Üdvözöllek!\nPrefix: ${ PREFIX }\n\n**Elérhető parancsok tőlem:**\n`;
 
         availableCommands.forEach(cmd => {
@@ -210,7 +215,28 @@ client.on('message', message => {
         }
     }
 
-    if (msg.startsWith(PREFIX + 'botsays')) {
+    if (msg.startsWith(PREFIX + 'botsaystochannel')) {
+        if(adminRole) {
+            const channelId = args[0];
+            let args2 = args;
+            args2.shift();
+            const allstring = args2.join(' ');
+            client.channels.fetch(channelId).then(channel  => {
+                channel.startTyping();
+                setTimeout(function(){
+                    channel.startTyping();
+                    setTimeout(function(){
+                        channel.send(allstring);
+                        channel.stopTyping(true);
+                    }, 5000);
+                }, 50000);
+            }).catch(() => {
+                return message.channel.send(`WTF is the channel ID: ${channelId}`);
+            });
+        }
+    }
+
+    if (msg.startsWith(PREFIX + 'botsays ')) {
         message.delete();
         if(adminRole) {
             const allstring = args.join(' ');
@@ -417,13 +443,8 @@ client.on('messageReactionAdd', (messageReaction, user) => {
 
 client.login(process.env.BOT_TOKEN);
 
-let task = schedule.scheduleJob('59 23 31 12 *', function(){
-    client.channels.fetch('386245947652440084').then(channel  => {
-        channel.send(`Boldog Új Évet into.hu! :) `);
-    });
-});
 
-let task2 = schedule.scheduleJob('35 17 31 12 *', function(){
+let task = schedule.scheduleJob('59 23 31 12 *', function(){
     client.channels.fetch('386245947652440084').then(channel  => {
         channel.startTyping();
         setTimeout(function(){
